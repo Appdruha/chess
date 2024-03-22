@@ -27,6 +27,7 @@ export class Figure {
   }
 
   setAllowedCells() {
+
   }
 
   moveFigure(target: Cell) {

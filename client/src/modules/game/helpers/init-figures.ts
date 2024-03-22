@@ -7,19 +7,13 @@ import { Bishop } from '../models/figures/Bishop.ts'
 import { Knight } from '../models/figures/Knight.ts'
 import { Rook } from '../models/figures/Rook.ts'
 
-interface DrawAllFiguresParams {
-  ctx: CanvasRenderingContext2D | null
-  cells: Cell[] | null
-}
-
-interface DrawFiguresParams {
+interface InitFiguresParams {
   cells: Cell[]
-  ctx: CanvasRenderingContext2D
   color: 'WHITE' | 'BLACK'
   figureType: FigureNames
 }
 
-const drawFigures = ({ cells, ctx, color, figureType }: DrawFiguresParams) => {
+const initFigures = ({ cells, color, figureType }: InitFiguresParams) => {
   cells.forEach(cell => {
     if (figureType === 'Пешка') {
       cell.figure = new Pawn(color, cell)
@@ -34,78 +28,61 @@ const drawFigures = ({ cells, ctx, color, figureType }: DrawFiguresParams) => {
     } else {
       cell.figure = new King(color, cell)
     }
-    cell.figure.icon.onload = () => {
-      if (cell.figure) {
-        ctx.drawImage(cell.figure.icon, cell.x, cell.y)
-      }
-    }
   })
 }
 
 //ПЕРЕДЕЛАТЬ
-export const drawAllFigures = ({ ctx, cells }: DrawAllFiguresParams) => {
-  if (ctx && cells) {
-    drawFigures({
+export const initAllFigures = (cells: Cell[] | null) => {
+  if (cells) {
+    initFigures({
       cells: cells.filter(cell => cell.id.includes('2')),
-      ctx,
       figureType: FigureNames.PAWN,
       color: 'WHITE' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'E1'),
-      ctx,
       figureType: FigureNames.KING,
       color: 'WHITE' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'D1'),
-      ctx,
       figureType: FigureNames.QUEEN,
       color: 'WHITE' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'F1' || cell.id === 'C1'),
-      ctx,
       figureType: FigureNames.BISHOP,
       color: 'WHITE' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'A1' || cell.id === 'H1'),
-      ctx,
       figureType: FigureNames.ROOK,
       color: 'WHITE' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'B1' || cell.id === 'G1'),
-      ctx,
       figureType: FigureNames.KNIGHT,
       color: 'WHITE' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id.includes('7')),
-      ctx,
       figureType: FigureNames.PAWN,
       color: 'BLACK' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'E8'),
-      ctx,
       figureType: FigureNames.KING,
       color: 'BLACK' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'D8'),
-      ctx,
       figureType: FigureNames.QUEEN,
       color: 'BLACK' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'F8' || cell.id === 'C8'),
-      ctx,
       figureType: FigureNames.BISHOP,
       color: 'BLACK' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'A8' || cell.id === 'H8'),
-      ctx,
       figureType: FigureNames.ROOK,
       color: 'BLACK' })
-    drawFigures({
+    initFigures({
       cells: cells.filter(cell => cell.id === 'B8' || cell.id === 'G8'),
-      ctx,
       figureType: FigureNames.KNIGHT,
       color: 'BLACK' })
   } else {
-    throw new Error('drawFigures Error')
+    throw new Error('initFigures Error')
   }
 }

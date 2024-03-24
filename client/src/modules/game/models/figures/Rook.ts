@@ -9,4 +9,18 @@ export class Rook extends Figure {
     this.name = FigureNames.ROOK
     this.color === 'WHITE' ? this.icon.src = wR : this.icon.src = bR
   }
+
+  canMove(args: {target: Cell, cells: Cell[]}) {
+    const {target, cells} = args
+    if (!super.canMove({target})) {
+      return false
+    }
+    if (this.cell.isEmptyVertical(target, cells)) {
+      return true
+    }
+    if (this.cell.isEmptyHorizontal(target, cells)) {
+      return true
+    }
+    return false
+  }
 }

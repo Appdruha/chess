@@ -13,20 +13,27 @@ interface HandleClickParams {
   cells: Cell[] | null
   chessBoard: HTMLCanvasElement | null
   chessBoardPosition: null | {x: number, y: number}
+  prevCellRef: MutableRefObject<Cell | null>
 }
 
-export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chessBoardPosition }: HandleClickParams) => {
+export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chessBoardPosition, prevCellRef }: HandleClickParams) => {
   if (cells && chessBoard && chessBoardPosition) {
-    if (selectedFigureRef.current) {
+    if (selectedFigureRef.current && prevCellRef.current) {
       const cell = cells.filter(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      cell[0].figure = selectedFigureRef.current
+      if (selectedFigureRef.current.canMove({target: cell[0], cells})) {
+        cell[0].setFigure(selectedFigureRef.current)
+      } else {
+        prevCellRef.current.setFigure(selectedFigureRef.current)
+      }
       selectedFigureRef.current = null
+
     } else {
       const cell = cells.filter(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
       selectedFigureRef.current = cell[0].figure
-      cell[0].figure = null
+      prevCellRef.current = cell[0]
+      cell[0].setFigure(null)
     }
   } else {
     throw new Error('handleClick Error')

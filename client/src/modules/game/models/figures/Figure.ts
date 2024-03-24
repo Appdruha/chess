@@ -16,20 +16,15 @@ export class Figure {
   cell: Cell
   name: FigureNames | null
   icon: HTMLImageElement
-  allowedCells: Cell[] | null
 
   constructor(color: FigureColor, cell: Cell) {
     this.color = color
     this.cell = cell
     this.name = null
     this.icon = new Image()
-    this.allowedCells = null
   }
 
-  setAllowedCells() {
-
-  }
-
-  moveFigure(target: Cell) {
+  canMove(args: {target: Cell, cells?: Cell[]}): boolean {
+    return !(args.target.figure && (args.target.figure.color === this.color || args.target.figure.name === FigureNames.KING))
   }
 }

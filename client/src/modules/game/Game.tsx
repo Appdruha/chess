@@ -18,6 +18,7 @@ export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
   const chessBoardCtxRef = useRef<null | CanvasRenderingContext2D>(null)
   const cellsRef = useRef<null | Cell[]>(null)
+  const prevCellRef = useRef<null | Cell>(null)
   const selectedFigureRef = useRef<null | Pawn | Knight | Bishop | Rook | King | Queen>(null)
   const clientPositionRef = useRef<{ x: number, y: number } | null>(null)
   const requestRef = useRef<undefined | number>(undefined)
@@ -86,6 +87,7 @@ export const Game = () => {
 
     return () => {
       window.removeEventListener('resize', handleResize)
+      cancelAnimationFrame(requestRef.current as number)
     }
   }, [])
 
@@ -106,6 +108,7 @@ export const Game = () => {
                 chessBoard: chessBoardRef.current,
                 selectedFigureRef,
                 chessBoardPosition: chessBoardPositionRef.current,
+                prevCellRef
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,

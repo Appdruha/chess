@@ -16,17 +16,17 @@ interface InitFiguresParams {
 const initFigures = ({ cells, color, figureType }: InitFiguresParams) => {
   cells.forEach(cell => {
     if (figureType === 'Пешка') {
-      cell.figure = new Pawn(color, cell)
+      cell.setFigure(new Pawn(color, cell))
     } else if (figureType === 'Ферзь') {
-      cell.figure = new Queen(color, cell)
+      cell.setFigure(new Queen(color, cell))
     } else if (figureType === 'Слон') {
-      cell.figure = new Bishop(color, cell)
+      cell.setFigure(new Bishop(color, cell))
     } else if (figureType === 'Конь') {
-      cell.figure = new Knight(color, cell)
+      cell.setFigure(new Knight(color, cell))
     } else if (figureType === 'Ладья') {
-      cell.figure = new Rook(color, cell)
+      cell.setFigure(new Rook(color, cell))
     } else {
-      cell.figure = new King(color, cell)
+      cell.setFigure(new King(color, cell))
     }
   })
 }

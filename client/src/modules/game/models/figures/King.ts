@@ -5,7 +5,6 @@ import bK from '../../../../assets/alpha/bK.png'
 import { Rook } from './Rook.ts'
 
 export class King extends Figure {
-  isUnderAttack = false
   isFirstStep = true
 
   constructor(color: FigureColor, cell: Cell) {
@@ -34,7 +33,7 @@ export class King extends Figure {
     if (this.cell.isEmptyDiagonal(target, cells) && dy === this.cell.cellSideSize && dx === this.cell.cellSideSize) {
       return true
     }
-    if (this.isFirstStep && !this.isUnderAttack && this.cell.isEmptyHorizontal(target, cells)) {
+    if (this.isFirstStep && !this.cell.isUnderAttack(cells, this.color) && this.cell.isEmptyHorizontal(target, cells)) {
       const cellSideSize = this.cell.cellSideSize
       const castling = (rookCell: Cell | undefined, dx: number) => {
         if (rookCell && rookCell.figure && rookCell.figure.name === 'Ладья') {

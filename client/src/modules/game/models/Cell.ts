@@ -33,49 +33,51 @@ export class Cell {
 
   isEmptyVertical(target: Cell, cells: Cell[]): boolean {
     if (this.x !== target.x) {
-      return false;
+      return false
     }
 
-    const min = Math.min(this.y, target.y);
-    const max = Math.max(this.y, target.y);
+    const min = Math.min(this.y, target.y)
+    const max = Math.max(this.y, target.y)
     for (let y = min + this.cellSideSize; y < max; y += this.cellSideSize) {
       const cell = cells.find(cell => cell.x === target.x && cell.y === y)
-      if(!cell || cell._figure) {
+      if (!cell || cell._figure) {
         return false
       }
     }
-    return true;
+    return true
   }
 
   isEmptyHorizontal(target: Cell, cells: Cell[]): boolean {
     if (this.y !== target.y) {
-      return false;
+      return false
     }
 
-    const min = Math.min(this.x, target.x);
-    const max = Math.max(this.x, target.x);
+    const min = Math.min(this.x, target.x)
+    const max = Math.max(this.x, target.x)
     for (let x = min + this.cellSideSize; x < max; x += this.cellSideSize) {
       const cell = cells.find(cell => cell.y === target.y && cell.x === x)
-      if(!cell || cell._figure) {
+      if (!cell || cell._figure) {
         return false
       }
     }
-    return true;
+    return true
   }
 
-  isEmptyDiagonal(target: Cell): boolean {
-    const absX = Math.abs(target.x - this.x);
-    const absY = Math.abs(target.y - this.y);
-    if(absY !== absX)
-      return false;
+  isEmptyDiagonal(target: Cell, cells: Cell[]): boolean {
+    const absX = Math.abs(target.x - this.x)
+    const absY = Math.abs(target.y - this.y)
+    if (absY !== absX)
+      return false
 
     const dy = this.y < target.y ? 1 : -1
     const dx = this.x < target.x ? 1 : -1
 
-    for (let i = 1; i < absY; i++) {
-      if(!this.board.getCell(this.x + dx*i, this.y + dy   * i).isEmpty())
-        return false;
+    for (let i = this.cellSideSize; i < absY; i += this.cellSideSize) {
+      const cell = cells.find(cell => cell.y === this.y + dy * i && cell.x === this.x + dx * i)
+      if (!cell || cell._figure) {
+        return false
+      }
     }
-    return true;
+    return true
   }
 }

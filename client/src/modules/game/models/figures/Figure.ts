@@ -24,7 +24,7 @@ export class Figure {
     this.icon = new Image()
   }
 
-  canMove(args: {target: Cell, cells?: Cell[]}): boolean {
+  canMove(args: { target: Cell, cells?: Cell[] }): boolean {
     return !(args.target.figure && (args.target.figure.color === this.color || args.target.figure.name === FigureNames.KING))
   }
 }

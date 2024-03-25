@@ -80,4 +80,25 @@ export class Cell {
     }
     return true
   }
+
+  isUnderAttack(cells: Cell[], color: 'WHITE' | 'BLACK') {
+    let isCellUnderAttack = false
+    cells.forEach(cell => {
+      if (cell.figure && cell.figure.color !== color && (cell.figure.name === 'Пешка' || cell.figure.canMove({
+        target: this,
+        cells,
+      }))) {
+        if (!(cell.figure.name === 'Пешка' && cell.x === this.x)) {
+          if (cell.figure.name === 'Пешка' && this.y === cell.y + (cell.figure.color === 'BLACK' ? 1 : -1) * this.cellSideSize
+            && (this.x === cell.x + this.cellSideSize || this.x === cell.x - this.cellSideSize)) {
+            return isCellUnderAttack = true
+          }
+          if (cell.figure.name !== 'Пешка') {
+            return isCellUnderAttack = true
+          }
+        }
+      }
+    })
+    return isCellUnderAttack
+  }
 }

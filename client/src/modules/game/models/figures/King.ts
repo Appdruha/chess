@@ -17,6 +17,9 @@ export class King extends Figure {
   canMove(args: { target: Cell, cells: Cell[] }) {
     const { target, cells } = args
 
+    if (target.isUnderAttack(cells, this.color)) {
+      return false
+    }
     if (!super.canMove({ target })) {
       return false
     }
@@ -34,7 +37,7 @@ export class King extends Figure {
       this.isFirstStep = false
       return true
     }
-    if (this.isFirstStep && this.cell.isEmptyHorizontal(target, cells)) {
+    if (this.isFirstStep && !this.isUnderAttack && this.cell.isEmptyHorizontal(target, cells)) {
       const cellSideSize = this.cell.cellSideSize
       const castling = (rookCell: Cell | undefined, dx: number) => {
         if (rookCell && rookCell.figure && rookCell.figure.name === 'Ладья') {

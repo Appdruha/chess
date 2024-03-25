@@ -24,14 +24,12 @@ export class Pawn extends Figure {
     if ((target.y === this.cell.y + direction * cellSideSize || this.isFirstStep
         && (target.y === this.cell.y + firstStepDirection * cellSideSize))
       && target.x === this.cell.x && !target.figure && this.cell.isEmptyVertical(target, cells)) {
-      this.isFirstStep = false
       return true
     }
 
     if (target.y === this.cell.y + direction * cellSideSize
       && (target.x === this.cell.x + cellSideSize || target.x === this.cell.x - cellSideSize)
       && target.figure) {
-      this.isFirstStep = false
       return true
     }
 

@@ -26,15 +26,12 @@ export class King extends Figure {
     const dx = Math.abs(this.cell.x - target.x)
     const dy = Math.abs(this.cell.y - target.y)
     if (this.cell.isEmptyVertical(target, cells) && dy === this.cell.cellSideSize) {
-      this.isFirstStep = false
       return true
     }
     if (this.cell.isEmptyHorizontal(target, cells) && dx === this.cell.cellSideSize) {
-      this.isFirstStep = false
       return true
     }
     if (this.cell.isEmptyDiagonal(target, cells) && dy === this.cell.cellSideSize && dx === this.cell.cellSideSize) {
-      this.isFirstStep = false
       return true
     }
     if (this.isFirstStep && !this.isUnderAttack && this.cell.isEmptyHorizontal(target, cells)) {
@@ -43,11 +40,13 @@ export class King extends Figure {
         if (rookCell && rookCell.figure && rookCell.figure.name === 'Ладья') {
           const rook = rookCell.figure as Rook
           const newRookCell = cells.find(cell => cell.x === target.x - dx && cell.y === target.y)
-          if (newRookCell && rook.isFirstStep && rook.canMove({ target, cells })) {
+          if (newRookCell && !newRookCell.isUnderAttack(cells, this.color) && rook.isFirstStep && rook.canMove({
+            target,
+            cells,
+          })) {
             rook.isFirstStep = false
             newRookCell.setFigure(rookCell.figure)
             rookCell.setFigure(null)
-            this.isFirstStep = false
             return true
           } else {
             return false
@@ -55,11 +54,11 @@ export class King extends Figure {
         }
       }
       let rookCell = cells.find(cell => cell.x === target.x + cellSideSize && cell.y === target.y)
-      if (castling(rookCell, cellSideSize)) {
+      if (rookCell && castling(rookCell, cellSideSize)) {
         return true
       }
       rookCell = cells.find(cell => cell.x === target.x - cellSideSize * 2 && cell.y === target.y)
-      if (castling(rookCell, -cellSideSize)) {
+      if (rookCell && castling(rookCell, -cellSideSize)) {
         return true
       }
     }

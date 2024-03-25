@@ -23,6 +23,18 @@ export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chess
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
       if (selectedFigureRef.current.canMove({target: cell[0], cells})) {
         cell[0].setFigure(selectedFigureRef.current)
+        if (cell[0].figure?.name === 'Пешка') {
+          const figure = cell[0].figure as Pawn
+          figure.isFirstStep = false
+        }
+        if (cell[0].figure?.name === 'Ладья') {
+          const figure = cell[0].figure as Rook
+          figure.isFirstStep = false
+        }
+        if (cell[0].figure?.name === 'Король') {
+          const figure = cell[0].figure as King
+          figure.isFirstStep = false
+        }
       } else {
         prevCellRef.current.setFigure(selectedFigureRef.current)
       }

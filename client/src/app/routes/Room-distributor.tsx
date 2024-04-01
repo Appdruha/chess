@@ -1,14 +1,13 @@
-import { useContext, useEffect, useState } from 'react'
+import { ReactNode, useContext, useEffect, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { webSocketApi } from '../../api/web-socket.ts'
 import { Message } from '../../../types.ts'
 import { WebSocketContext } from '../web-socket-context.ts'
 
-export const RoomDistributor = () => {
+export const RoomDistributor = (props: {children: ReactNode}) => {
   let room = useParams().roomId
   const socket = useContext(WebSocketContext)
-  const [isConnected, setIsConnected] = useState(false)
-  const [roomId, setRoomId] = useState(room)
+  const [roomId, setRoomId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (!room) {
@@ -17,19 +16,22 @@ export const RoomDistributor = () => {
         params: null,
         roomId: '',
       }
-      webSocketApi(socket, setRoomId, setIsConnected, message)
+      webSocketApi(socket, setRoomId, message)
     } else {
       const message: Message = {
         type: 'join',
         params: null,
         roomId: room,
       }
-      webSocketApi(socket, setRoomId, setIsConnected, message)
+      webSocketApi(socket, setRoomId, message)
     }
   }, [])
 
-  if (!isConnected) {
+  if (!roomId) {
     return <h1>LOADING...</h1>
+  }
+  if (room) {
+    return props.children
   }
   return <Navigate to={roomId!} />
 }

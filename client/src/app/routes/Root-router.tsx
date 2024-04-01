@@ -7,8 +7,7 @@ export const RootRouter = () => {
   return (
     <Routes>
       <Route path='/' element={<Layout />}>
-        <Route index element={<RoomDistributor />} />
-        <Route path=':roomId' element={<GamingRoomPage />} />
+        <Route index path=':roomId?' element={<RoomDistributor><GamingRoomPage /></RoomDistributor>} />
       </Route>
     </Routes>
   )

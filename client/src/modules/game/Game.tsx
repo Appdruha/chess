@@ -15,6 +15,7 @@ import { handleClick } from './helpers/handle-click.ts'
 import { handleMouseMove } from './helpers/handle-mouse-move.ts'
 import { WebSocketContext } from '../../app/web-socket-context.ts'
 import { useParams } from 'react-router-dom'
+import { handleSocketMessage } from './api/handle-socket-message.ts'
 
 export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
@@ -32,6 +33,10 @@ export const Game = () => {
     width: window.innerWidth,
     height: window.innerHeight,
   })
+
+  webSocket.onmessage = (event) => {
+    handleSocketMessage({event, cells: cellsRef.current, selectedFigureRef})
+  }
 
   const init = () => {
     if (chessBoardCtxRef.current) {

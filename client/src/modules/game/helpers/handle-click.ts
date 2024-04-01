@@ -24,7 +24,6 @@ export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chess
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
       if (cell && selectedFigureRef.current.canMove({target: cell, cells})) {
-        cell.setFigure(selectedFigureRef.current)
         const message = {
           type: 'message',
           params: {
@@ -48,9 +47,8 @@ export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chess
         }
       } else {
         prevCellRef.current.setFigure(selectedFigureRef.current)
+        selectedFigureRef.current = null
       }
-      selectedFigureRef.current = null
-
     } else {
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)

@@ -43,12 +43,12 @@ wss.on('connection', function connection(ws: MyWebSocket) {
         break
       case 'join':
         join(roomId)
+        ws.send(JSON.stringify({ roomId }))
         break
       case 'leave':
         leave(roomId)
         break
       case 'message':
-        console.log(roomId, params)
         broadcastMessage(params, roomId)
         break
       default:
@@ -65,7 +65,6 @@ wss.on('connection', function connection(ws: MyWebSocket) {
   }
 
   function join(roomId: string) {
-    console.log(roomId)
     if (!Object.keys(rooms).includes(roomId)) {
       console.warn(`Room ${roomId} does not exist!`)
       return
@@ -97,7 +96,7 @@ function broadcastMessage(message: MessageParams, roomId: string) {
   wss.clients.forEach((ws) => {
     const client = ws as MyWebSocket
     if (client.roomId === roomId) {
-      ws.send(JSON.stringify(message))
+      ws.send(JSON.stringify({move: message}))
     }
   })
 }

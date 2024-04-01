@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { chessBoardData } from './consts/canvas-data.ts'
 import { initCells } from './helpers/init-cells.ts'
 import styles from './game.module.css'
@@ -13,6 +13,8 @@ import { King } from './models/figures/King.ts'
 import { Queen } from './models/figures/Queen.ts'
 import { handleClick } from './helpers/handle-click.ts'
 import { handleMouseMove } from './helpers/handle-mouse-move.ts'
+import { WebSocketContext } from '../../app/web-socket-context.ts'
+import { useParams } from 'react-router-dom'
 
 export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
@@ -23,6 +25,8 @@ export const Game = () => {
   const clientPositionRef = useRef<{ x: number, y: number } | null>(null)
   const requestRef = useRef<undefined | number>(undefined)
   const chessBoardPositionRef = useRef<{ x: number, y: number } | null>(null)
+  const roomId = useParams().roomId
+  const webSocket = useContext(WebSocketContext)
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -108,7 +112,9 @@ export const Game = () => {
                 chessBoard: chessBoardRef.current,
                 selectedFigureRef,
                 chessBoardPosition: chessBoardPositionRef.current,
-                prevCellRef
+                prevCellRef,
+                webSocket,
+                roomId
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,

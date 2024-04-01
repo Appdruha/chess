@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from 'ws'
 import dotenv from 'dotenv'
 import { v4 } from 'uuid'
+import * as console from 'console'
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` })
 const PORT = process.env.PORT
@@ -38,7 +39,7 @@ wss.on('connection', function connection(ws: MyWebSocket) {
     switch (type) {
       case 'create':
         const room = create()
-        ws.send(room)
+        ws.send(JSON.stringify({ roomId: room }))
         break
       case 'join':
         join(roomId)
@@ -47,6 +48,7 @@ wss.on('connection', function connection(ws: MyWebSocket) {
         leave(roomId)
         break
       case 'message':
+        console.log(roomId, params)
         broadcastMessage(params, roomId)
         break
       default:
@@ -63,6 +65,7 @@ wss.on('connection', function connection(ws: MyWebSocket) {
   }
 
   function join(roomId: string) {
+    console.log(roomId)
     if (!Object.keys(rooms).includes(roomId)) {
       console.warn(`Room ${roomId} does not exist!`)
       return

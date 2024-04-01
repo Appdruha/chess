@@ -1,7 +1,7 @@
 import { Game } from '../../modules/game'
 
-export const MainPage = () => {
+export const GamingRoomPage = () => {
   return (
-    <Game/>
+    <Game />
   )
 }

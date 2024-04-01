@@ -14,25 +14,36 @@ interface HandleClickParams {
   chessBoard: HTMLCanvasElement | null
   chessBoardPosition: null | {x: number, y: number}
   prevCellRef: MutableRefObject<Cell | null>
+  webSocket: WebSocket | null
+  roomId: string | undefined
 }
 
-export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chessBoardPosition, prevCellRef }: HandleClickParams) => {
-  if (cells && chessBoard && chessBoardPosition) {
+export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chessBoardPosition, prevCellRef, webSocket, roomId }: HandleClickParams) => {
+  if (cells && chessBoard && chessBoardPosition && webSocket && roomId) {
     if (selectedFigureRef.current && prevCellRef.current) {
-      const cell = cells.filter(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
+      const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      if (selectedFigureRef.current.canMove({target: cell[0], cells})) {
-        cell[0].setFigure(selectedFigureRef.current)
-        if (cell[0].figure?.name === 'Пешка' && cell[0].id !== prevCellRef.current?.id) {
-          const figure = cell[0].figure as Pawn
+      if (cell && selectedFigureRef.current.canMove({target: cell, cells})) {
+        cell.setFigure(selectedFigureRef.current)
+        const message = {
+          type: 'message',
+          params: {
+            from: prevCellRef.current?.id,
+            to: cell.id
+          },
+          roomId
+        }
+        webSocket.send(JSON.stringify(message))
+        if (cell.figure?.name === 'Пешка' && cell.id !== prevCellRef.current?.id) {
+          const figure = cell.figure as Pawn
           figure.isFirstStep = false
         }
-        if (cell[0].figure?.name === 'Ладья' && cell[0].id !== prevCellRef.current?.id) {
-          const figure = cell[0].figure as Rook
+        if (cell.figure?.name === 'Ладья' && cell.id !== prevCellRef.current?.id) {
+          const figure = cell.figure as Rook
           figure.isFirstStep = false
         }
-        if (cell[0].figure?.name === 'Король' && cell[0].id !== prevCellRef.current?.id) {
-          const figure = cell[0].figure as King
+        if (cell.figure?.name === 'Король' && cell.id !== prevCellRef.current?.id) {
+          const figure = cell.figure as King
           figure.isFirstStep = false
         }
       } else {
@@ -41,11 +52,13 @@ export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chess
       selectedFigureRef.current = null
 
     } else {
-      const cell = cells.filter(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
+      const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      selectedFigureRef.current = cell[0].figure
-      prevCellRef.current = cell[0]
-      cell[0].setFigure(null)
+      if (cell) {
+        selectedFigureRef.current = cell.figure
+        prevCellRef.current = cell
+        cell.setFigure(null)
+      }
     }
   } else {
     throw new Error('handleClick Error')

@@ -1,4 +1,4 @@
-import { Message } from '../../types.ts'
+import { Message } from '../types/Message.ts'
 
 export const webSocketApi = (webSocket: WebSocket | null,
                              setRoomId: React.Dispatch<React.SetStateAction<string | undefined>>,

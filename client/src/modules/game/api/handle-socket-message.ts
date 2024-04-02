@@ -15,6 +15,7 @@ interface HandleSocketMessageParams {
 
 export const handleSocketMessage = ({cells, selectedFigureRef, event}: HandleSocketMessageParams) => {
     if (JSON.parse(event.data).move) {
+      console.log(JSON.parse(event.data).move)
       const cell = cells?.find(cell => cell.id === JSON.parse(event.data).move.to)!
       if (!selectedFigureRef.current) {
         const prevCell = cells?.find(cell => cell.id === JSON.parse(event.data).move.from)!

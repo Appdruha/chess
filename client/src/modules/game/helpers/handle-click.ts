@@ -6,6 +6,7 @@ import { Rook } from '../models/figures/Rook.ts'
 import { King } from '../models/figures/King.ts'
 import { Queen } from '../models/figures/Queen.ts'
 import { Cell } from '../models/Cell.ts'
+import { Message } from '../../../types/Message.ts'
 
 interface HandleClickParams {
   selectedFigureRef: MutableRefObject<null | Pawn | Knight | Bishop | Rook | King | Queen>
@@ -23,28 +24,32 @@ export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chess
     if (selectedFigureRef.current && prevCellRef.current) {
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      if (cell && selectedFigureRef.current.canMove({target: cell, cells})) {
-        const message = {
-          type: 'message',
+      if (cell && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({target: cell, cells})) {
+        const message: Message = {
+          type: 'move',
           params: {
-            from: prevCellRef.current?.id,
+            from: prevCellRef.current.id,
             to: cell.id
           },
           roomId
         }
+        if (selectedFigureRef.current.name === 'Король') {
+          const figure = selectedFigureRef.current as King
+          figure.isFirstStep = false
+          if (Math.abs(cell.x - prevCellRef.current?.x) > cell.cellSideSize && figure.rookCastling) {
+            message.type = 'castling'
+            message.params = {...message.params, from1: figure.rookCastling.from, to1: figure.rookCastling.to}
+          }
+        }
+        if (selectedFigureRef.current.name === 'Пешка') {
+          const figure = selectedFigureRef.current as Pawn
+          figure.isFirstStep = false
+        }
+        if (selectedFigureRef.current.name === 'Ладья') {
+          const figure = selectedFigureRef.current as Rook
+          figure.isFirstStep = false
+        }
         webSocket.send(JSON.stringify(message))
-        if (cell.figure?.name === 'Пешка' && cell.id !== prevCellRef.current?.id) {
-          const figure = cell.figure as Pawn
-          figure.isFirstStep = false
-        }
-        if (cell.figure?.name === 'Ладья' && cell.id !== prevCellRef.current?.id) {
-          const figure = cell.figure as Rook
-          figure.isFirstStep = false
-        }
-        if (cell.figure?.name === 'Король' && cell.id !== prevCellRef.current?.id) {
-          const figure = cell.figure as King
-          figure.isFirstStep = false
-        }
       } else {
         prevCellRef.current.setFigure(selectedFigureRef.current)
         selectedFigureRef.current = null

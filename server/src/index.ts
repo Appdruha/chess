@@ -13,10 +13,12 @@ interface MyWebSocket extends WebSocket {
 type MessageParams = {
   from: string
   to: string
+  from1?: string
+  to1?: string
 } | null
 
 interface Message {
-  type: 'create' | 'join' | 'leave' | 'message'
+  type: 'create' | 'join' | 'leave' | 'move' | 'castling'
   params: MessageParams
   roomId: string
 }
@@ -48,8 +50,15 @@ wss.on('connection', function connection(ws: MyWebSocket) {
       case 'leave':
         leave(roomId)
         break
-      case 'message':
-        broadcastMessage(params, roomId)
+      case 'move':
+        if (params)
+          broadcastMessage({from: params.from, to: params.to}, roomId)
+        break
+      case 'castling':
+        if (params && params.to1 && params.from1) {
+          broadcastMessage({ from: params.from, to: params.to }, roomId)
+          broadcastMessage({ from: params.from1, to: params.to1 }, roomId)
+        }
         break
       default:
         console.warn(`Type: ${type} unknown`)

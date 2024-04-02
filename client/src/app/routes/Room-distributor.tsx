@@ -1,7 +1,7 @@
 import { ReactNode, useContext, useEffect, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { webSocketApi } from '../../api/web-socket.ts'
-import { Message } from '../../../types.ts'
+import { Message } from '../../types/Message.ts'
 import { WebSocketContext } from '../web-socket-context.ts'
 
 export const RoomDistributor = (props: {children: ReactNode}) => {

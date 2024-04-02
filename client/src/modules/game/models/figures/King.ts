@@ -6,6 +6,7 @@ import { Rook } from './Rook.ts'
 
 export class King extends Figure {
   isFirstStep = true
+  rookCastling: {from: string, to: string} | null = null
 
   constructor(color: FigureColor, cell: Cell) {
     super(color, cell)
@@ -44,8 +45,10 @@ export class King extends Figure {
             cells,
           })) {
             rook.isFirstStep = false
-            newRookCell.setFigure(rookCell.figure)
-            rookCell.setFigure(null)
+            this.rookCastling = {
+              from: rookCell.id,
+              to: newRookCell.id
+            }
             return true
           } else {
             return false

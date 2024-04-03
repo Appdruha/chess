@@ -8,9 +8,11 @@ const PORT = process.env.PORT
 
 interface MyWebSocket extends WebSocket {
   roomId: string | undefined
+  color: 'BLACK' | 'WHITE'
 }
 
 type MessageParams = {
+  toggleTurn: boolean
   from: string
   to: string
   from1?: string
@@ -41,23 +43,23 @@ wss.on('connection', function connection(ws: MyWebSocket) {
     switch (type) {
       case 'create':
         const room = create()
-        ws.send(JSON.stringify({ roomId: room }))
+        ws.send(JSON.stringify({ roomId: room, color: ws.color }))
         break
       case 'join':
         join(roomId)
-        ws.send(JSON.stringify({ roomId }))
+        ws.send(JSON.stringify({ roomId, color: ws.color }))
         break
       case 'leave':
         leave(roomId)
         break
       case 'move':
         if (params)
-          broadcastMessage({from: params.from, to: params.to}, roomId)
+          broadcastMessage({ from: params.from, to: params.to, toggleTurn: true }, roomId)
         break
       case 'castling':
         if (params && params.to1 && params.from1) {
-          broadcastMessage({ from: params.from, to: params.to }, roomId)
-          broadcastMessage({ from: params.from1, to: params.to1 }, roomId)
+          broadcastMessage({ from: params.from, to: params.to, toggleTurn: false }, roomId)
+          broadcastMessage({ from: params.from1, to: params.to1, toggleTurn: true }, roomId)
         }
         break
       default:
@@ -70,6 +72,7 @@ wss.on('connection', function connection(ws: MyWebSocket) {
     const roomId = v4()
     rooms[roomId] = [ws]
     ws.roomId = roomId
+    ws.color = Math.random() < 0.5 ? 'WHITE' : 'BLACK'
     return roomId
   }
 
@@ -84,7 +87,9 @@ wss.on('connection', function connection(ws: MyWebSocket) {
       return
     }
 
+    const existingPlayer = rooms[roomId][0] as MyWebSocket
     rooms[roomId].push(ws)
+    ws.color = existingPlayer.color === 'WHITE' ? 'BLACK' : 'WHITE'
     ws.roomId = roomId
   }
 
@@ -105,7 +110,7 @@ function broadcastMessage(message: MessageParams, roomId: string) {
   wss.clients.forEach((ws) => {
     const client = ws as MyWebSocket
     if (client.roomId === roomId) {
-      ws.send(JSON.stringify({move: message}))
+      ws.send(JSON.stringify({ move: message }))
     }
   })
 }

@@ -25,6 +25,7 @@ export class Figure {
   }
 
   canMove(args: { target: Cell, cells?: Cell[] }): boolean {
+
     return !(args.target.figure && args.target.figure.color === this.color)
   }
 }

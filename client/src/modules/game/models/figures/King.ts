@@ -7,17 +7,19 @@ import { Rook } from './Rook.ts'
 export class King extends Figure {
   isFirstStep = true
   rookCastling: {from: string, to: string} | null = null
+  isMyTurn: boolean
 
   constructor(color: FigureColor, cell: Cell) {
     super(color, cell)
     this.name = FigureNames.KING
     this.color === 'WHITE' ? this.icon.src = wK : this.icon.src = bK
+    this.isMyTurn = false
   }
 
   canMove(args: { target: Cell, cells: Cell[] }) {
     const { target, cells } = args
 
-    if (target.isUnderAttack(cells, this.color)) {
+    if (this.isMyTurn && target.isUnderAttack(cells, this.color)) {
       return false
     }
     if (!super.canMove({ target })) {
@@ -34,7 +36,7 @@ export class King extends Figure {
     if (this.cell.isEmptyDiagonal(target, cells) && dy === this.cell.cellSideSize && dx === this.cell.cellSideSize) {
       return true
     }
-    if (this.isFirstStep && !this.cell.isUnderAttack(cells, this.color) && this.cell.isEmptyHorizontal(target, cells)) {
+    if (this.isMyTurn && this.isFirstStep && !this.cell.isUnderAttack(cells, this.color) && this.cell.isEmptyHorizontal(target, cells)) {
       const cellSideSize = this.cell.cellSideSize
       const castling = (rookCell: Cell | undefined, dx: number) => {
         if (rookCell && rookCell.figure && rookCell.figure.name === 'Ладья') {

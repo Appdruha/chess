@@ -81,8 +81,8 @@ export class Cell {
     return true
   }
 
-  isUnderAttack(cells: Cell[], color: 'WHITE' | 'BLACK') {
-    let isCellUnderAttack = false
+  isUnderAttack(cells: Cell[], color: 'WHITE' | 'BLACK'): null | { figure: Figure, intermCells: string[] } {
+    let attackingFigure: null | { figure: Figure, intermCellIds: string[] } = null
     cells.forEach(cell => {
       if (cell.figure && cell.figure.color !== color && (cell.figure.name === 'Пешка' || cell.figure.canMove({
         target: this,
@@ -91,14 +91,34 @@ export class Cell {
         if (!(cell.figure.name === 'Пешка' && cell.x === this.x)) {
           if (cell.figure.name === 'Пешка' && this.y === cell.y + (cell.figure.color === 'BLACK' ? 1 : -1) * this.cellSideSize
             && (this.x === cell.x + this.cellSideSize || this.x === cell.x - this.cellSideSize)) {
-            return isCellUnderAttack = true
+            return attackingFigure = { figure: cell.figure, intermCellIds: [cell.id] }
           }
           if (cell.figure.name !== 'Пешка') {
-            return isCellUnderAttack = true
+            let intermCellIds: string[] = []
+            if (cell.x === this.x) {
+              const maxY = Math.max(this.y, cell.y)
+              const minY = Math.min(this.y, cell.y)
+              intermCellIds = cells.filter(i => i.x === this.x && i.y <= maxY && i.y >= minY && i.y !== this.y).map(j => j.id)
+            }
+            if (cell.y === this.y) {
+              const maxX = Math.max(this.x, cell.x)
+              const minX = Math.min(this.x, cell.x)
+              intermCellIds = cells.filter(i => i.y === this.y && i.x <= maxX && i.x >= minX && i.x !== this.x).map(j => j.id)
+            }
+            const absX = Math.abs(cell.x - this.x)
+            const absY = Math.abs(cell.y - this.y)
+            if (absY === absX) {
+              const maxX = Math.max(this.x, cell.x)
+              const minX = Math.min(this.x, cell.x)
+              intermCellIds = cells
+                .filter(i => i.x <= maxX && i.x >= minX && Math.abs(i.x - this.x) === Math.abs(i.y - this.y) && i.x !== this.x)
+                .map(j => j.id)
+            }
+            return attackingFigure = { figure: cell.figure, intermCellIds }
           }
         }
       }
     })
-    return isCellUnderAttack
+    return attackingFigure
   }
 }

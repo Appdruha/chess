@@ -7,38 +7,56 @@ import { King } from '../models/figures/King.ts'
 import { Queen } from '../models/figures/Queen.ts'
 import { Cell } from '../models/Cell.ts'
 import { Message } from '../../../types/Message.ts'
+import { Player } from '../models/Player.ts'
 
 interface HandleClickParams {
   selectedFigureRef: MutableRefObject<null | Pawn | Knight | Bishop | Rook | King | Queen>
   event: MouseEvent<HTMLCanvasElement>
   cells: Cell[] | null
   chessBoard: HTMLCanvasElement | null
-  chessBoardPosition: null | {x: number, y: number}
+  chessBoardPosition: null | { x: number, y: number }
   prevCellRef: MutableRefObject<Cell | null>
   webSocket: WebSocket | null
   roomId: string | undefined
+  player: Player | null
 }
 
-export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chessBoardPosition, prevCellRef, webSocket, roomId }: HandleClickParams) => {
-  if (cells && chessBoard && chessBoardPosition && webSocket && roomId) {
+export const handleClick = ({
+                              selectedFigureRef,
+                              event,
+                              cells,
+                              chessBoard,
+                              chessBoardPosition,
+                              prevCellRef,
+                              webSocket,
+                              roomId,
+                              player,
+                            }: HandleClickParams) => {
+  if (cells && chessBoard && chessBoardPosition && webSocket && roomId && player) {
     if (selectedFigureRef.current && prevCellRef.current) {
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      if (cell && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({target: cell, cells})) {
+      const kingAttacker = player.king.cell.isUnderAttack(cells, player.color)
+      if (cell && (!kingAttacker || kingAttacker.intermCells.includes(cell.id)) && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({
+        target: cell,
+        cells,
+      })) {
         const message: Message = {
           type: 'move',
           params: {
             from: prevCellRef.current.id,
-            to: cell.id
+            to: cell.id,
           },
-          roomId
+          roomId,
         }
         if (selectedFigureRef.current.name === 'Король') {
           const figure = selectedFigureRef.current as King
           figure.isFirstStep = false
           if (Math.abs(cell.x - prevCellRef.current?.x) > cell.cellSideSize && figure.rookCastling) {
             message.type = 'castling'
-            message.params = {...message.params, from1: figure.rookCastling.from, to1: figure.rookCastling.to}
+            if (message.params) {
+              message.params = { ...message.params, from1: figure.rookCastling.from, to1: figure.rookCastling.to }
+            }
           }
         }
         if (selectedFigureRef.current.name === 'Пешка') {
@@ -54,10 +72,10 @@ export const handleClick = ({ selectedFigureRef, event, cells, chessBoard, chess
         prevCellRef.current.setFigure(selectedFigureRef.current)
         selectedFigureRef.current = null
       }
-    } else {
+    } else if (player && player.isMyTurn) {
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      if (cell) {
+      if (cell && cell.figure && cell.figure.color === player.color) {
         selectedFigureRef.current = cell.figure
         prevCellRef.current = cell
         cell.setFigure(null)

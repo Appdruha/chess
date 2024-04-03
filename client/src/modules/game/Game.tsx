@@ -16,6 +16,7 @@ import { handleMouseMove } from './helpers/handle-mouse-move.ts'
 import { WebSocketContext } from '../../app/web-socket-context.ts'
 import { useParams } from 'react-router-dom'
 import { handleSocketMessage } from './api/handle-socket-message.ts'
+import { Player } from './models/Player.ts'
 
 export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
@@ -26,6 +27,7 @@ export const Game = () => {
   const clientPositionRef = useRef<{ x: number, y: number } | null>(null)
   const requestRef = useRef<undefined | number>(undefined)
   const chessBoardPositionRef = useRef<{ x: number, y: number } | null>(null)
+  const playerRef = useRef<null | Player>(null)
   const roomId = useParams().roomId
   const webSocket = useContext(WebSocketContext)
 
@@ -35,7 +37,7 @@ export const Game = () => {
   })
 
   webSocket.onmessage = (event) => {
-    handleSocketMessage({event, cells: cellsRef.current, selectedFigureRef})
+    handleSocketMessage({event, cells: cellsRef.current, selectedFigureRef, player: playerRef.current})
   }
 
   const init = () => {
@@ -85,6 +87,14 @@ export const Game = () => {
       throw new Error('No canvas is found')
     }
 
+    if (cellsRef.current) {
+      const findKing = (cells: Cell[]) => {
+        return cells.find(cell => cell.figure?.name === 'Король' && cell.figure?.color === sessionStorage.getItem('color'))?.figure
+      }
+      playerRef.current = new Player(sessionStorage.getItem('color'), findKing(cellsRef.current))
+      console.log(playerRef.current)
+    }
+
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
@@ -119,7 +129,8 @@ export const Game = () => {
                 chessBoardPosition: chessBoardPositionRef.current,
                 prevCellRef,
                 webSocket,
-                roomId
+                roomId,
+                player: playerRef.current
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,

@@ -19,8 +19,13 @@ export class King extends Figure {
   canMove(args: { target: Cell, cells: Cell[] }) {
     const { target, cells } = args
 
-    if (this.isMyTurn && target.isUnderAttack(cells, this.color)) {
-      return false
+    if (this.isMyTurn) {
+      const figure = target.figure
+      target.setFigure(null)
+      if (target.isUnderAttack(cells, this.color)) {
+        target.setFigure(figure)
+        return false
+      }
     }
     if (!super.canMove({ target })) {
       return false

@@ -81,7 +81,7 @@ export class Cell {
     return true
   }
 
-  isUnderAttack(cells: Cell[], color: 'WHITE' | 'BLACK'): null | { figure: Figure, intermCells: string[] } {
+  isUnderAttack(cells: Cell[], color: 'WHITE' | 'BLACK'): null | { figure: Figure, intermCellIds: string[] } {
     let attackingFigure: null | { figure: Figure, intermCellIds: string[] } = null
     cells.forEach(cell => {
       if (cell.figure && cell.figure.color !== color && (cell.figure.name === 'Пешка' || cell.figure.canMove({

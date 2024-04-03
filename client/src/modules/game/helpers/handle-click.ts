@@ -37,7 +37,8 @@ export const handleClick = ({
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
       const kingAttacker = player.king.cell.isUnderAttack(cells, player.color)
-      if (cell && (!kingAttacker || kingAttacker.intermCells.includes(cell.id)) && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({
+      if (cell && ((!kingAttacker || kingAttacker.intermCellIds.includes(cell.id) || selectedFigureRef.current?.name === 'Король'))
+        && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({
         target: cell,
         cells,
       })) {

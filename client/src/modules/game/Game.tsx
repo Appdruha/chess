@@ -17,6 +17,7 @@ import { WebSocketContext } from '../../app/web-socket-context.ts'
 import { useParams } from 'react-router-dom'
 import { handleSocketMessage } from './api/handle-socket-message.ts'
 import { Player } from './models/Player.ts'
+import { KingAttacker } from './types/KingAttacker.ts'
 
 export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
@@ -28,6 +29,7 @@ export const Game = () => {
   const requestRef = useRef<undefined | number>(undefined)
   const chessBoardPositionRef = useRef<{ x: number, y: number } | null>(null)
   const playerRef = useRef<null | Player>(null)
+  const kingAttackerRef = useRef<null | KingAttacker>(null)
   const roomId = useParams().roomId
   const webSocket = useContext(WebSocketContext)
 
@@ -37,7 +39,14 @@ export const Game = () => {
   })
 
   webSocket.onmessage = (event) => {
-    handleSocketMessage({event, cells: cellsRef.current, selectedFigureRef, player: playerRef.current})
+    handleSocketMessage({
+      event,
+      cells: cellsRef.current,
+      selectedFigureRef,
+      player: playerRef.current,
+      kingAttackerRef,
+      webSocket
+    })
   }
 
   const init = () => {
@@ -130,7 +139,8 @@ export const Game = () => {
                 prevCellRef,
                 webSocket,
                 roomId,
-                player: playerRef.current
+                player: playerRef.current,
+                kingAttackerRef
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,

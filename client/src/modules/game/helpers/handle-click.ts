@@ -8,6 +8,7 @@ import { Queen } from '../models/figures/Queen.ts'
 import { Cell } from '../models/Cell.ts'
 import { Message } from '../../../types/Message.ts'
 import { Player } from '../models/Player.ts'
+import { KingAttacker } from '../types/KingAttacker.ts'
 
 interface HandleClickParams {
   selectedFigureRef: MutableRefObject<null | Pawn | Knight | Bishop | Rook | King | Queen>
@@ -19,6 +20,7 @@ interface HandleClickParams {
   webSocket: WebSocket | null
   roomId: string | undefined
   player: Player | null
+  kingAttackerRef: MutableRefObject<null | KingAttacker>
 }
 
 export const handleClick = ({
@@ -31,16 +33,16 @@ export const handleClick = ({
                               webSocket,
                               roomId,
                               player,
+                              kingAttackerRef,
                             }: HandleClickParams) => {
   if (cells && chessBoard && chessBoardPosition && webSocket && roomId && player) {
     if (selectedFigureRef.current && prevCellRef.current) {
       const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
         && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
-      const kingAttacker = player.king.cell.isUnderAttack(cells, player.color)
-      if (cell && ((!kingAttacker || kingAttacker.intermCellIds.includes(cell.id) || selectedFigureRef.current?.name === 'Король'))
-        && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({
+      if (cell && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({
         target: cell,
         cells,
+        kingAttacker: kingAttackerRef.current,
       })) {
         const message: Message = {
           type: 'move',

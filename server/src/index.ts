@@ -11,17 +11,17 @@ interface MyWebSocket extends WebSocket {
   color: 'BLACK' | 'WHITE'
 }
 
-type MessageParams = {
+type MoveParams = {
   toggleTurn: boolean
   from: string
   to: string
   from1?: string
   to1?: string
-} | null
+}
 
 interface Message {
-  type: 'create' | 'join' | 'leave' | 'move' | 'castling'
-  params: MessageParams
+  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'endGame' | 'error'
+  params: MoveParams | { color: 'BLACK' | 'WHITE' } | null
   roomId: string
 }
 
@@ -30,38 +30,47 @@ const wss = new WebSocketServer({
 }, () => console.log(`Server started on port ${PORT}`))
 
 const maxClients = 2
-const rooms: Record<string, WebSocket[]> = {}
+const rooms: Record<string, MyWebSocket[]> = {}
 
 wss.on('connection', function connection(ws: MyWebSocket) {
   ws.on('message', function message(message) {
     const data: Message = JSON.parse(message.toString())
 
     const type = data.type
-    const params = data.params
     const roomId = data.roomId
 
     switch (type) {
-      case 'create':
+      case 'create': {
         const room = create()
         ws.send(JSON.stringify({ roomId: room, color: ws.color }))
         break
-      case 'join':
+      }
+      case 'join': {
         join(roomId)
         ws.send(JSON.stringify({ roomId, color: ws.color }))
         break
-      case 'leave':
+      }
+      case 'leave': {
         leave(roomId)
         break
-      case 'move':
-        if (params)
-          broadcastMessage({ from: params.from, to: params.to, toggleTurn: true }, roomId)
+      }
+      case 'move': {
+        const params = data.params as MoveParams
+        broadcastMessage({ from: params.from, to: params.to, toggleTurn: true }, roomId)
         break
-      case 'castling':
+      }
+      case 'endGame': {
+        broadcastMessage(null, roomId)
+        break
+      }
+      case 'castling': {
+        const params = data.params as MoveParams
         if (params && params.to1 && params.from1) {
           broadcastMessage({ from: params.from, to: params.to, toggleTurn: false }, roomId)
           broadcastMessage({ from: params.from1, to: params.to1, toggleTurn: true }, roomId)
         }
         break
+      }
       default:
         console.warn(`Type: ${type} unknown`)
         break
@@ -106,7 +115,7 @@ wss.on('connection', function connection(ws: MyWebSocket) {
   }
 })
 
-function broadcastMessage(message: MessageParams, roomId: string) {
+function broadcastMessage(message: MoveParams, roomId: string) {
   wss.clients.forEach((ws) => {
     const client = ws as MyWebSocket
     if (client.roomId === roomId) {

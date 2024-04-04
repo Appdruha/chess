@@ -9,7 +9,6 @@ export const webSocketApi = (webSocket: WebSocket | null,
       webSocket.send(JSON.stringify(message))
     }
     webSocket.onmessage = (event) => {
-      console.log(event.data)
       if (JSON.parse(event.data).roomId && JSON.parse(event.data).color) {
         setRoomId(JSON.parse(event.data).roomId)
         sessionStorage.setItem('color', JSON.parse(event.data).color)

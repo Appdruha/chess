@@ -1,4 +1,5 @@
 import { Cell } from '../Cell.ts'
+import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export enum FigureNames {
   KING = 'Король',
@@ -24,8 +25,11 @@ export class Figure {
     this.icon = new Image()
   }
 
-  canMove(args: { target: Cell, cells?: Cell[] }): boolean {
-
-    return !(args.target.figure && args.target.figure.color === this.color)
+  canMove(args: { target: Cell, cells?: Cell[], kingAttacker?: KingAttacker}): boolean {
+    const {target, kingAttacker} = args
+    if (kingAttacker && !kingAttacker.intermCells.includes(target)) {
+      return false
+    }
+    return !(target.figure && target.figure.color === this.color)
   }
 }

@@ -2,6 +2,7 @@ import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
 import wP from '../../../../assets/alpha/wP.png'
 import bP from '../../../../assets/alpha/bP.png'
+import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Pawn extends Figure {
   isFirstStep = true
@@ -12,9 +13,9 @@ export class Pawn extends Figure {
     this.color === 'WHITE' ? this.icon.src = wP : this.icon.src = bP
   }
 
-  canMove(args: { target: Cell, cells: Cell[] }) {
-    const { target, cells } = args
-    if (!super.canMove({ target })) {
+  canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {
+    const { target, cells, kingAttacker } = args
+    if (!super.canMove({ target, kingAttacker })) {
       return false
     }
     const direction = this.color === 'WHITE' ? -1 : 1

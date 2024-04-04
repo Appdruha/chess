@@ -2,6 +2,7 @@ import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
 import wQ from '../../../../assets/alpha/wQ.png'
 import bQ from '../../../../assets/alpha/bQ.png'
+import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Queen extends Figure {
   constructor(color: FigureColor, cell: Cell) {
@@ -10,9 +11,9 @@ export class Queen extends Figure {
     this.color === 'WHITE' ? this.icon.src = wQ : this.icon.src = bQ
   }
 
-  canMove(args: { target: Cell, cells: Cell[] }) {
-    const { target, cells } = args
-    if (!super.canMove({ target })) {
+  canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {
+    const { target, cells, kingAttacker } = args
+    if (!super.canMove({ target, kingAttacker })) {
       return false
     }
     if (this.cell.isEmptyVertical(target, cells)) {

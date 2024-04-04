@@ -2,6 +2,7 @@ import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
 import wN from '../../../../assets/alpha/wN.png'
 import bN from '../../../../assets/alpha/bN.png'
+import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Knight extends Figure {
   constructor(color: FigureColor, cell: Cell) {
@@ -10,9 +11,9 @@ export class Knight extends Figure {
     this.color === 'WHITE' ? this.icon.src = wN : this.icon.src = bN
   }
 
-  canMove(args: { target: Cell, cells: Cell[] }) {
-    const { target } = args
-    if (!super.canMove({ target })) {
+  canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {
+    const { target, kingAttacker } = args
+    if (!super.canMove({ target, kingAttacker })) {
       return false
     }
     const dx = Math.abs(this.cell.x - target.x)

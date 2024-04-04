@@ -2,6 +2,7 @@ import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
 import wR from '../../../../assets/alpha/wR.png'
 import bR from '../../../../assets/alpha/bR.png'
+import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Rook extends Figure {
   isFirstStep = true
@@ -12,9 +13,9 @@ export class Rook extends Figure {
     this.color === 'WHITE' ? this.icon.src = wR : this.icon.src = bR
   }
 
-  canMove(args: { target: Cell, cells: Cell[] }) {
-    const { target, cells } = args
-    if (!super.canMove({ target })) {
+  canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {
+    const { target, cells, kingAttacker } = args
+    if (!super.canMove({ target, kingAttacker })) {
       return false
     }
     if (this.cell.isEmptyVertical(target, cells)) {

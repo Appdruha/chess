@@ -1,12 +1,15 @@
-export type MessageParams = {
+export type MoveParams = {
+  toggleTurn?: boolean
   from: string
   to: string
   from1?: string
   to1?: string
-} | null
+}
+
+export type PlayerParams = { color: 'BLACK' | 'WHITE' }
 
 export interface Message {
-  type: 'create' | 'join' | 'leave' | 'move' | 'castling'
-  params: MessageParams
+  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'endGame' | 'error'
+  params: MoveParams | PlayerParams | string | null
   roomId: string
 }

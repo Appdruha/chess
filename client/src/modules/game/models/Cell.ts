@@ -24,6 +24,7 @@ export class Cell {
   }
 
   setFigure(figure: Figure | null) {
+    console.log(figure, this.id)
     if (figure) {
       this._figure = figure
       this._figure.cell = this
@@ -85,14 +86,15 @@ export class Cell {
   isUnderAttack(cells: Cell[], color: 'WHITE' | 'BLACK'): KingAttacker {
     let attackingFigure: KingAttacker = null
     cells.forEach(cell => {
-      if (cell.figure && cell.figure.color !== color && (cell.figure.name === 'Пешка' || cell.figure.canMove({
+      const figure = cell.figure
+      if (figure && figure.color !== color && (figure.name === 'Пешка' || figure.canMove({
         target: this,
         cells,
       }))) {
-        if (!(cell.figure.name === 'Пешка' && cell.x === this.x)) {
-          if (cell.figure.name === 'Пешка' && this.y === cell.y + (cell.figure.color === 'BLACK' ? 1 : -1) * this.cellSideSize
+        if (!(figure.name === 'Пешка' && cell.x === this.x)) {
+          if (figure.name === 'Пешка' && this.y === cell.y + (figure.color === 'BLACK' ? 1 : -1) * this.cellSideSize
             && (this.x === cell.x + this.cellSideSize || this.x === cell.x - this.cellSideSize)) {
-            return attackingFigure = { figure: cell.figure, intermCells: [cell] }
+            return attackingFigure = { figure, intermCells: [cell] }
           }
           if (cell.figure.name !== 'Пешка') {
             let intermCells: Cell[] = []
@@ -114,7 +116,7 @@ export class Cell {
               intermCells = cells
                 .filter(i => i.x <= maxX && i.x >= minX && Math.abs(i.x - this.x) === Math.abs(i.y - this.y) && i.x !== this.x)
             }
-            return attackingFigure = { figure: cell.figure, intermCells }
+            return attackingFigure = { figure, intermCells }
           }
         }
       }

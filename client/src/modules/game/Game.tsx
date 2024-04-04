@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom'
 import { handleSocketMessage } from './api/handle-socket-message.ts'
 import { Player } from './models/Player.ts'
 import { KingAttacker } from './types/KingAttacker.ts'
+import { ColorNames } from './types/ColorNames.ts'
 
 export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
@@ -31,7 +32,7 @@ export const Game = () => {
   const playerRef = useRef<null | Player>(null)
   const kingAttackerRef = useRef<null | KingAttacker>(null)
   const roomId = useParams().roomId
-  const webSocket = useContext(WebSocketContext)
+  const webSocket = useContext(WebSocketContext) as WebSocket
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -45,7 +46,8 @@ export const Game = () => {
       selectedFigureRef,
       player: playerRef.current,
       kingAttackerRef,
-      webSocket
+      webSocket,
+      roomId
     })
   }
 
@@ -96,12 +98,12 @@ export const Game = () => {
       throw new Error('No canvas is found')
     }
 
-    if (cellsRef.current) {
+    if (cellsRef.current && sessionStorage.getItem('color')) {
+      const color = sessionStorage.getItem('color') as ColorNames
       const findKing = (cells: Cell[]) => {
-        return cells.find(cell => cell.figure?.name === 'Король' && cell.figure?.color === sessionStorage.getItem('color'))?.figure
+        return cells.find(cell => cell.figure && cell.figure.name === 'Король' && cell.figure.color === color)?.figure as King
       }
-      playerRef.current = new Player(sessionStorage.getItem('color'), findKing(cellsRef.current))
-      console.log(playerRef.current)
+      playerRef.current = new Player(color, findKing(cellsRef.current))
     }
 
     const handleResize = () => {

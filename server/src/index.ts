@@ -19,9 +19,11 @@ type MoveParams = {
   to1?: string
 }
 
+type PlayerParams = { color: 'BLACK' | 'WHITE' }
+
 interface Message {
   type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'endGame' | 'error'
-  params: MoveParams | { color: 'BLACK' | 'WHITE' } | null
+  params: MoveParams | PlayerParams | string | null
   roomId: string
 }
 
@@ -33,41 +35,68 @@ const maxClients = 2
 const rooms: Record<string, MyWebSocket[]> = {}
 
 wss.on('connection', function connection(ws: MyWebSocket) {
+  const messageForClient: Message = {
+    type: 'create',
+    roomId: '',
+    params: null,
+  }
   ws.on('message', function message(message) {
     const data: Message = JSON.parse(message.toString())
-
     const type = data.type
     const roomId = data.roomId
 
     switch (type) {
       case 'create': {
-        const room = create()
-        ws.send(JSON.stringify({ roomId: room, color: ws.color }))
+        messageForClient.type = 'create'
+        messageForClient.roomId = create()
+        messageForClient.params = { color: ws.color }
+        ws.send(JSON.stringify(messageForClient))
         break
       }
       case 'join': {
+        messageForClient.type = 'join'
         join(roomId)
-        ws.send(JSON.stringify({ roomId, color: ws.color }))
+        messageForClient.roomId = roomId
+        messageForClient.params = { color: ws.color }
+        broadcastMessage(messageForClient)
         break
       }
       case 'leave': {
+        messageForClient.type = 'leave'
+        messageForClient.roomId = roomId
+        messageForClient.params = null
         leave(roomId)
+        ws.send(JSON.stringify(messageForClient))
         break
       }
       case 'move': {
         const params = data.params as MoveParams
-        broadcastMessage({ from: params.from, to: params.to, toggleTurn: true }, roomId)
+        messageForClient.type = 'move'
+        messageForClient.roomId = roomId
+        messageForClient.params = { from: params.from, to: params.to, toggleTurn: true }
+        broadcastMessage(messageForClient)
         break
       }
       case 'endGame': {
-        broadcastMessage(null, roomId)
+        messageForClient.type = 'endGame'
+        messageForClient.roomId = roomId
+        messageForClient.params = { color: ws.color === 'WHITE' ? 'BLACK' : 'WHITE' }
+        broadcastMessage(messageForClient)
         break
       }
       case 'castling': {
         const params = data.params as MoveParams
+        messageForClient.type = 'move'
+        messageForClient.roomId = roomId
         if (params && params.to1 && params.from1) {
-          broadcastMessage({ from: params.from, to: params.to, toggleTurn: false }, roomId)
-          broadcastMessage({ from: params.from1, to: params.to1, toggleTurn: true }, roomId)
+          messageForClient.params = { from: params.from, to: params.to, toggleTurn: false }
+          broadcastMessage(messageForClient)
+          messageForClient.params = { from: params.from1, to: params.to1, toggleTurn: true }
+          broadcastMessage(messageForClient)
+        } else {
+          messageForClient.type = 'error'
+          messageForClient.params = 'Недостаточно данных'
+          ws.send(JSON.stringify(messageForClient))
         }
         break
       }
@@ -87,16 +116,18 @@ wss.on('connection', function connection(ws: MyWebSocket) {
 
   function join(roomId: string) {
     if (!Object.keys(rooms).includes(roomId)) {
-      console.warn(`Room ${roomId} does not exist!`)
-      return
+      messageForClient.type = 'error'
+      messageForClient.params = `Комнаты с ${roomId} не существует`
+      return ws.send(JSON.stringify(messageForClient))
     }
 
     if (rooms[roomId].length >= maxClients) {
-      console.warn(`Room ${roomId} is full!`)
-      return
+      messageForClient.type = 'error'
+      messageForClient.params = `Комната с ${roomId} переполнена`
+      return ws.send(JSON.stringify(messageForClient))
     }
 
-    const existingPlayer = rooms[roomId][0] as MyWebSocket
+    const existingPlayer = rooms[roomId][0]
     rooms[roomId].push(ws)
     ws.color = existingPlayer.color === 'WHITE' ? 'BLACK' : 'WHITE'
     ws.roomId = roomId
@@ -115,11 +146,11 @@ wss.on('connection', function connection(ws: MyWebSocket) {
   }
 })
 
-function broadcastMessage(message: MoveParams, roomId: string) {
+function broadcastMessage(message: Message) {
   wss.clients.forEach((ws) => {
     const client = ws as MyWebSocket
-    if (client.roomId === roomId) {
-      ws.send(JSON.stringify({ move: message }))
+    if (client.roomId === message.roomId) {
+      ws.send(JSON.stringify(message))
     }
   })
 }

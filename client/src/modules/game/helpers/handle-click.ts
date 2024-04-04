@@ -6,7 +6,7 @@ import { Rook } from '../models/figures/Rook.ts'
 import { King } from '../models/figures/King.ts'
 import { Queen } from '../models/figures/Queen.ts'
 import { Cell } from '../models/Cell.ts'
-import { Message } from '../../../types/Message.ts'
+import { Message, MoveParams } from '../../../types/Message.ts'
 import { Player } from '../models/Player.ts'
 import { KingAttacker } from '../types/KingAttacker.ts'
 
@@ -57,9 +57,8 @@ export const handleClick = ({
           figure.isFirstStep = false
           if (Math.abs(cell.x - prevCellRef.current?.x) > cell.cellSideSize && figure.rookCastling) {
             message.type = 'castling'
-            if (message.params) {
-              message.params = { ...message.params, from1: figure.rookCastling.from, to1: figure.rookCastling.to }
-            }
+            const newMessageParams = message.params as MoveParams
+            message.params = { ...newMessageParams, from1: figure.rookCastling.from, to1: figure.rookCastling.to }
           }
         }
         if (selectedFigureRef.current.name === 'Пешка') {

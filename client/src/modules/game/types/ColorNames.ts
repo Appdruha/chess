@@ -1,0 +1,1 @@
+export type ColorNames = 'WHITE' | 'BLACK'

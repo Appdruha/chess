@@ -26,6 +26,7 @@ export class King extends Figure {
         target.setFigure(figure)
         return false
       }
+      target.setFigure(figure)
     }
     if (!super.canMove({ target })) {
       return false

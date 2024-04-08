@@ -1,16 +1,14 @@
 import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
-import wR from '../../../../assets/alpha/wR.png'
-import bR from '../../../../assets/alpha/bR.png'
 import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Rook extends Figure {
   isFirstStep = true
 
-  constructor(color: FigureColor, cell: Cell) {
+  constructor(color: FigureColor, cell: Cell, src: { black: string, white: string }) {
     super(color, cell)
     this.name = FigureNames.ROOK
-    this.color === 'WHITE' ? this.icon.src = wR : this.icon.src = bR
+    this.color === 'WHITE' ? this.icon.src = src.white : this.icon.src = src.black
   }
 
   canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {

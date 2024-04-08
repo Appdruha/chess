@@ -47,19 +47,24 @@ export const Game = () => {
       player: playerRef.current,
       kingAttackerRef,
       webSocket,
-      roomId
+      roomId,
     })
   }
 
   const init = () => {
     if (chessBoardCtxRef.current) {
+      const ctx = chessBoardCtxRef.current
       initCells({
         black: Colors.BLACK,
         white: Colors.WHITE,
         boardWidth: chessBoardData.width,
         cellsRef,
       })
-      initAllFigures(cellsRef.current)
+      initAllFigures(cellsRef.current, sessionStorage.getItem('color') as ColorNames)
+      if (sessionStorage.getItem('color') === 'BLACK') {
+        ctx.translate(chessBoardData.width, chessBoardData.height)
+        ctx.rotate(Math.PI)
+      }
     } else {
       throw new Error('init Error')
     }
@@ -75,11 +80,22 @@ export const Game = () => {
         if (cell.figure) {
           ctx.drawImage(cell.figure.icon, cell.x, cell.y)
         }
+        cellsRef.current?.forEach(cell => {
+          if (cell.figure) {
+            cell.figure.icon.className = `${styles.rotatedFigure}`
+          }
+        })
       })
-      if (clientPositionRef.current && selectedFigureRef.current && chessBoardRef.current && chessBoardPositionRef.current) {
-        ctx.drawImage(selectedFigureRef.current.icon,
-          clientPositionRef.current.x - chessBoardPositionRef.current.x - 40,
-          clientPositionRef.current.y - chessBoardPositionRef.current.y - 40)
+      if (clientPositionRef.current && selectedFigureRef.current && chessBoardRef.current && chessBoardPositionRef.current && playerRef.current) {
+        if (playerRef.current.color === 'BLACK') {
+          ctx.drawImage(selectedFigureRef.current.icon,
+            640 - clientPositionRef.current.x - 40,
+            640 - clientPositionRef.current.y - 40)
+        } else {
+          ctx.drawImage(selectedFigureRef.current.icon,
+            clientPositionRef.current.x - chessBoardData.width / 16,
+            clientPositionRef.current.y - chessBoardData.height / 16)
+        }
       }
       requestRef.current = window.requestAnimationFrame(() => drawAll())
     } else {
@@ -132,21 +148,21 @@ export const Game = () => {
     <div className={styles.chessBoardContainer}>
       <canvas ref={chessBoardRef}
               className={styles.chessBoard}
-              onClick={(event) => handleClick({
+              onClick={() => handleClick({
                 cells: cellsRef.current,
-                event,
                 chessBoard: chessBoardRef.current,
                 selectedFigureRef,
-                chessBoardPosition: chessBoardPositionRef.current,
+                clientPosition: clientPositionRef.current,
                 prevCellRef,
                 webSocket,
                 roomId,
                 player: playerRef.current,
-                kingAttackerRef
+                kingAttackerRef,
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,
                 clientPositionRef,
+                chessBoardPosition: chessBoardPositionRef.current
               })}
       ></canvas>
     </div>

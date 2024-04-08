@@ -24,7 +24,6 @@ export class Cell {
   }
 
   setFigure(figure: Figure | null) {
-    console.log(figure, this.id)
     if (figure) {
       this._figure = figure
       this._figure.cell = this

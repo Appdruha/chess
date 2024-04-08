@@ -1,4 +1,4 @@
-import { MutableRefObject, MouseEvent } from 'react'
+import { MutableRefObject } from 'react'
 import { Pawn } from '../models/figures/Pawn.ts'
 import { Knight } from '../models/figures/Knight.ts'
 import { Bishop } from '../models/figures/Bishop.ts'
@@ -9,13 +9,13 @@ import { Cell } from '../models/Cell.ts'
 import { Message, MoveParams } from '../../../types/Message.ts'
 import { Player } from '../models/Player.ts'
 import { KingAttacker } from '../types/KingAttacker.ts'
+import { ColorNames } from '../types/ColorNames.ts'
 
 interface HandleClickParams {
   selectedFigureRef: MutableRefObject<null | Pawn | Knight | Bishop | Rook | King | Queen>
-  event: MouseEvent<HTMLCanvasElement>
   cells: Cell[] | null
   chessBoard: HTMLCanvasElement | null
-  chessBoardPosition: null | { x: number, y: number }
+  clientPosition: null | { x: number, y: number }
   prevCellRef: MutableRefObject<Cell | null>
   webSocket: WebSocket | null
   roomId: string | undefined
@@ -23,22 +23,30 @@ interface HandleClickParams {
   kingAttackerRef: MutableRefObject<null | KingAttacker>
 }
 
+const findCell = (color: ColorNames, clientPosition: {x: number, y: number}, cells: Cell[]) => {
+  if (color === 'BLACK') {
+    return cells.find(cell => Math.abs(cell.x + 40 - (640 - clientPosition.x)) <= 40
+      && Math.abs(cell.y + 40 - (640 - clientPosition.y)) <= 40)
+  } else {
+    return cells.find(cell => Math.abs(cell.x + 40 - clientPosition.x) <= 40
+      && Math.abs(cell.y + 40 - clientPosition.y) <= 40)
+  }
+}
+
 export const handleClick = ({
                               selectedFigureRef,
-                              event,
                               cells,
                               chessBoard,
-                              chessBoardPosition,
+                              clientPosition,
                               prevCellRef,
                               webSocket,
                               roomId,
                               player,
                               kingAttackerRef,
                             }: HandleClickParams) => {
-  if (cells && chessBoard && chessBoardPosition && webSocket && roomId && player) {
+  if (cells && chessBoard && clientPosition && webSocket && roomId && player) {
+    const cell = findCell(player.color, clientPosition, cells)
     if (selectedFigureRef.current && prevCellRef.current) {
-      const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
-        && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
       if (cell && cell.id !== prevCellRef.current?.id && selectedFigureRef.current.canMove({
         target: cell,
         cells,
@@ -75,8 +83,6 @@ export const handleClick = ({
         selectedFigureRef.current = null
       }
     } else if (player && player.isMyTurn) {
-      const cell = cells.find(cell => Math.abs(cell.x + chessBoardPosition.x + 40 - event.clientX) <= 40
-        && Math.abs(cell.y + chessBoardPosition.y + 40 - event.clientY) <= 40)
       if (cell && cell.figure && cell.figure.color === player.color) {
         selectedFigureRef.current = cell.figure
         prevCellRef.current = cell

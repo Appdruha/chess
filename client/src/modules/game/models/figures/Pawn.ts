@@ -1,16 +1,14 @@
 import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
-import wP from '../../../../assets/alpha/wP.png'
-import bP from '../../../../assets/alpha/bP.png'
 import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Pawn extends Figure {
   isFirstStep = true
 
-  constructor(color: FigureColor, cell: Cell) {
+  constructor(color: FigureColor, cell: Cell, src: { black: string, white: string }) {
     super(color, cell)
     this.name = FigureNames.PAWN
-    this.color === 'WHITE' ? this.icon.src = wP : this.icon.src = bP
+    this.color === 'WHITE' ? this.icon.src = src.white : this.icon.src = src.black
   }
 
   canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {

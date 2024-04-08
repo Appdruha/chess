@@ -1,14 +1,12 @@
 import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
-import wQ from '../../../../assets/alpha/wQ.png'
-import bQ from '../../../../assets/alpha/bQ.png'
 import { KingAttacker } from '../../types/KingAttacker.ts'
 
 export class Queen extends Figure {
-  constructor(color: FigureColor, cell: Cell) {
+  constructor(color: FigureColor, cell: Cell, src: { black: string, white: string }) {
     super(color, cell)
     this.name = FigureNames.QUEEN
-    this.color === 'WHITE' ? this.icon.src = wQ : this.icon.src = bQ
+    this.color === 'WHITE' ? this.icon.src = src.white : this.icon.src = src.black
   }
 
   canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {

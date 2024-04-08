@@ -1,7 +1,5 @@
 import { Figure, FigureColor, FigureNames } from './Figure.ts'
 import { Cell } from '../Cell.ts'
-import wK from '../../../../assets/alpha/wK.png'
-import bK from '../../../../assets/alpha/bK.png'
 import { Rook } from './Rook.ts'
 
 export class King extends Figure {
@@ -9,10 +7,10 @@ export class King extends Figure {
   rookCastling: {from: string, to: string} | null = null
   isMyTurn: boolean
 
-  constructor(color: FigureColor, cell: Cell) {
+  constructor(color: FigureColor, cell: Cell, src: { black: string, white: string }) {
     super(color, cell)
     this.name = FigureNames.KING
-    this.color === 'WHITE' ? this.icon.src = wK : this.icon.src = bK
+    this.color === 'WHITE' ? this.icon.src = src.white : this.icon.src = src.black
     this.isMyTurn = false
   }
 

@@ -19,6 +19,8 @@ import { handleSocketMessage } from './api/handle-socket-message.ts'
 import { Player } from './models/Player.ts'
 import { KingAttacker } from './types/KingAttacker.ts'
 import { ColorNames } from './types/ColorNames.ts'
+import { Modal } from '../../modal/Modal.tsx'
+import { ChooseFigure } from '../choose-figure/Choose-figure.tsx'
 
 export const Game = () => {
   const chessBoardRef = useRef<null | HTMLCanvasElement>(null)
@@ -30,6 +32,7 @@ export const Game = () => {
   const requestRef = useRef<undefined | number>(undefined)
   const chessBoardPositionRef = useRef<{ x: number, y: number } | null>(null)
   const playerRef = useRef<null | Player>(null)
+  const changeFigureRef = useRef<null | { from: string, to: string }>(null)
   const kingAttackerRef = useRef<null | KingAttacker>(null)
   const roomId = useParams().roomId
   const webSocket = useContext(WebSocketContext) as WebSocket
@@ -38,6 +41,7 @@ export const Game = () => {
     width: window.innerWidth,
     height: window.innerHeight,
   })
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   webSocket.onmessage = (event) => {
     handleSocketMessage({
@@ -158,13 +162,21 @@ export const Game = () => {
                 roomId,
                 player: playerRef.current,
                 kingAttackerRef,
+                setIsModalOpen,
+                changeFigureRef
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,
                 clientPositionRef,
-                chessBoardPosition: chessBoardPositionRef.current
+                chessBoardPosition: chessBoardPositionRef.current,
               })}
       ></canvas>
+      {isModalOpen &&
+        <Modal>
+          <ChooseFigure webSocket={webSocket} roomId={roomId} playerColor={playerRef.current?.color}
+                        changeFigurePosition={changeFigureRef.current} setIsModalOpen={setIsModalOpen} />
+        </Modal>
+      }
     </div>
   )
 }

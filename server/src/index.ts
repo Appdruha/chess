@@ -6,12 +6,21 @@ import * as console from 'console'
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` })
 const PORT = process.env.PORT
 
+enum FigureNames {
+  KING = 'Король',
+  KNIGHT = 'Конь',
+  PAWN = 'Пешка',
+  QUEEN = 'Ферзь',
+  ROOK = 'Ладья',
+  BISHOP = 'Слон',
+}
+
 interface MyWebSocket extends WebSocket {
   roomId: string | undefined
   color: 'BLACK' | 'WHITE'
 }
 
-type MoveParams = {
+interface MoveParams {
   toggleTurn: boolean
   from: string
   to: string
@@ -19,11 +28,18 @@ type MoveParams = {
   to1?: string
 }
 
-type PlayerParams = { color: 'BLACK' | 'WHITE' }
+interface ChangeFigureParams extends Required<Omit<MoveParams, 'from1' | 'to1'>> {
+  figureName: FigureNames
+  figureColor: 'BLACK' | 'WHITE'
+}
+
+interface PlayerParams {
+  color: 'BLACK' | 'WHITE'
+}
 
 interface Message {
-  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'endGame' | 'error'
-  params: MoveParams | PlayerParams | string | null
+  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'endGame' | 'error' | 'changeFigure'
+  params: MoveParams | PlayerParams | ChangeFigureParams | string | null
   roomId: string
 }
 
@@ -74,6 +90,20 @@ wss.on('connection', function connection(ws: MyWebSocket) {
         messageForClient.type = 'move'
         messageForClient.roomId = roomId
         messageForClient.params = { from: params.from, to: params.to, toggleTurn: true }
+        broadcastMessage(messageForClient)
+        break
+      }
+      case 'changeFigure': {
+        const params = data.params as ChangeFigureParams
+        messageForClient.type = 'changeFigure'
+        messageForClient.roomId = roomId
+        messageForClient.params = {
+          from: params.from,
+          to: params.to,
+          toggleTurn: true,
+          figureColor: params.figureColor,
+          figureName: params.figureName,
+        }
         broadcastMessage(messageForClient)
         break
       }

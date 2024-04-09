@@ -1,14 +1,6 @@
 import { Cell } from '../Cell.ts'
 import { KingAttacker } from '../../types/KingAttacker.ts'
-
-export enum FigureNames {
-  KING = 'Король',
-  KNIGHT = 'Конь',
-  PAWN = 'Пешка',
-  QUEEN = 'Ферзь',
-  ROOK = 'Ладья',
-  BISHOP = 'Слон',
-}
+import { FigureNames } from '../../../../models/figure-names.ts'
 
 export type FigureColor = 'BLACK' | 'WHITE'
 

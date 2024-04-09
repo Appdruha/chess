@@ -1,4 +1,7 @@
-export type MoveParams = {
+import { FigureNames } from '../models/figure-names.ts'
+import { ColorNames } from '../modules/game/types/ColorNames.ts'
+
+export interface MoveParams {
   toggleTurn?: boolean
   from: string
   to: string
@@ -6,10 +9,17 @@ export type MoveParams = {
   to1?: string
 }
 
-export type PlayerParams = { color: 'BLACK' | 'WHITE' }
+export interface ChangeFigureParams extends Required<Omit<MoveParams, 'from1' | 'to1'>> {
+  figureName: FigureNames
+  figureColor: ColorNames
+}
+
+export interface PlayerParams {
+  color: 'BLACK' | 'WHITE'
+}
 
 export interface Message {
-  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'endGame' | 'error'
-  params: MoveParams | PlayerParams | string | null
+  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'changeFigure' | 'endGame' | 'error'
+  params: MoveParams | PlayerParams | string | ChangeFigureParams | null
   roomId: string
 }

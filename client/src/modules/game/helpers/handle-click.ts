@@ -1,4 +1,4 @@
-import { MutableRefObject } from 'react'
+import { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import { Pawn } from '../models/figures/Pawn.ts'
 import { Knight } from '../models/figures/Knight.ts'
 import { Bishop } from '../models/figures/Bishop.ts'
@@ -21,9 +21,11 @@ interface HandleClickParams {
   roomId: string | undefined
   player: Player | null
   kingAttackerRef: MutableRefObject<null | KingAttacker>
+  setIsModalOpen: Dispatch<SetStateAction<boolean>>
+  changeFigureRef: MutableRefObject<null | { from: string, to: string }>
 }
 
-const findCell = (color: ColorNames, clientPosition: {x: number, y: number}, cells: Cell[]) => {
+const findCell = (color: ColorNames, clientPosition: { x: number, y: number }, cells: Cell[]) => {
   if (color === 'BLACK') {
     return cells.find(cell => Math.abs(cell.x + 40 - (640 - clientPosition.x)) <= 40
       && Math.abs(cell.y + 40 - (640 - clientPosition.y)) <= 40)
@@ -43,6 +45,8 @@ export const handleClick = ({
                               roomId,
                               player,
                               kingAttackerRef,
+                              setIsModalOpen,
+                              changeFigureRef,
                             }: HandleClickParams) => {
   if (cells && chessBoard && clientPosition && webSocket && roomId && player) {
     const cell = findCell(player.color, clientPosition, cells)
@@ -52,6 +56,10 @@ export const handleClick = ({
         cells,
         kingAttacker: kingAttackerRef.current,
       })) {
+        if (selectedFigureRef.current.name === 'Пешка' && (cell.id.includes('1') || cell.id.includes('8'))) {
+          changeFigureRef.current = {from: prevCellRef.current.id, to: cell.id}
+          return setIsModalOpen(true)
+        }
         const message: Message = {
           type: 'move',
           params: {
@@ -79,6 +87,9 @@ export const handleClick = ({
         }
         webSocket.send(JSON.stringify(message))
       } else {
+        if (kingAttackerRef.current && kingAttackerRef.current.intermCells.includes(prevCellRef.current)) {
+          kingAttackerRef.current = null
+        }
         prevCellRef.current.setFigure(selectedFigureRef.current)
         selectedFigureRef.current = null
       }
@@ -87,6 +98,9 @@ export const handleClick = ({
         selectedFigureRef.current = cell.figure
         prevCellRef.current = cell
         cell.setFigure(null)
+        if (!kingAttackerRef.current) {
+          kingAttackerRef.current = player.king.cell.isUnderAttack(cells, player.color)
+        }
       }
     }
   } else {

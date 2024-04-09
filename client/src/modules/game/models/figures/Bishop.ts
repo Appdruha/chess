@@ -1,4 +1,5 @@
-import { Figure, FigureColor, FigureNames } from './Figure.ts'
+import { Figure, FigureColor } from './Figure.ts'
+import { FigureNames } from '../../../../models/figure-names.ts'
 import { Cell } from '../Cell.ts'
 import { KingAttacker } from '../../types/KingAttacker.ts'
 
@@ -10,7 +11,7 @@ export class Bishop extends Figure {
   }
 
   canMove(args: { target: Cell, cells: Cell[], kingAttacker?: KingAttacker }) {
-    const { target, cells , kingAttacker} = args
+    const { target, cells, kingAttacker } = args
     if (!super.canMove({ target, kingAttacker })) {
       return false
     }

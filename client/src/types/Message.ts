@@ -19,7 +19,7 @@ export interface PlayerParams {
 }
 
 export interface Message {
-  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'changeFigure' | 'endGame' | 'error'
+  type: 'create' | 'join' | 'leave' | 'move' | 'castling' | 'changeFigure' | 'endGame' | 'error' | 'restart'
   params: MoveParams | PlayerParams | string | ChangeFigureParams | null
   roomId: string
 }

@@ -35,6 +35,8 @@ interface HandleSocketMessageParams {
   player: Player | null
   webSocket: WebSocket
   roomId: string | undefined
+  setRestart: React.Dispatch<React.SetStateAction<boolean>>
+  restart: boolean
 }
 
 export const handleSocketMessage = ({
@@ -45,6 +47,8 @@ export const handleSocketMessage = ({
                                       kingAttackerRef,
                                       webSocket,
                                       roomId,
+                                      setRestart,
+                                      restart,
                                     }: HandleSocketMessageParams) => {
   const data = JSON.parse(event.data) as Message
   const findKingAttacker = (toggleTurn: boolean | undefined, cells: Cell[], roomId: string) => {
@@ -53,7 +57,6 @@ export const handleSocketMessage = ({
       player.king.isMyTurn = player.isMyTurn
       kingAttackerRef.current = player.king.cell.isUnderAttack(cells, player.color)
       if (kingAttackerRef.current) {
-        console.log('ШАХ')
         const playerFigures = cells.filter(cell => cell.figure && cell.figure.color === player.color)
           .map(cell => cell.figure) as Figure[]
         const cellToPreventCheck = kingAttackerRef.current.intermCells.find(cell => {
@@ -80,15 +83,21 @@ export const handleSocketMessage = ({
     const params = data.params as PlayerParams
     alert(`${params.color === 'WHITE' ? 'Белые' : 'Черные'} победили!`)
   }
+  if (data.type === 'restart') {
+    const params = data.params as PlayerParams
+    sessionStorage.setItem('color', params.color)
+    setRestart(!restart)
+  }
+  if (data.type === 'error') {
+    console.log(data)
+  }
   if (data.type === 'join') {
     const params = data.params as PlayerParams
     alert(`Игрок подключился к комнате ${data.roomId}, цвет ${params.color}`)
   }
   if (data.type === 'changeFigure') {
     const params = data.params as ChangeFigureParams
-    console.log(params)
     if (cells && player && roomId) {
-      debugger
       cells.find(cell => cell.id === params.from)?.setFigure(null)
       const newCell = cells.find(cell => cell.id === params.to)
       if (!newCell) {
@@ -139,6 +148,7 @@ export const handleSocketMessage = ({
     }
     findKingAttacker(params.toggleTurn, cells, roomId)
   } else {
+    console.log(cells, roomId)
     throw new Error('handle socket message error')
   }
 }

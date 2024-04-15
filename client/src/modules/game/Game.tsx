@@ -42,6 +42,7 @@ export const Game = () => {
     height: window.innerHeight,
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [restart, setRestart] = useState(false)
 
   webSocket.onmessage = (event) => {
     handleSocketMessage({
@@ -52,6 +53,8 @@ export const Game = () => {
       kingAttackerRef,
       webSocket,
       roomId,
+      restart,
+      setRestart
     })
   }
 
@@ -138,8 +141,15 @@ export const Game = () => {
     return () => {
       window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(requestRef.current as number)
+      cellsRef.current = null
+      prevCellRef.current = null
+      selectedFigureRef.current = null
+      requestRef.current = undefined
+      playerRef.current = null
+      changeFigureRef.current = null
+      kingAttackerRef.current = null
     }
-  }, [])
+  }, [restart])
 
   useEffect(() => {
     if (chessBoardRef.current) {
@@ -163,7 +173,7 @@ export const Game = () => {
                 player: playerRef.current,
                 kingAttackerRef,
                 setIsModalOpen,
-                changeFigureRef
+                changeFigureRef,
               })}
               onMouseMove={(event) => handleMouseMove({
                 event,
